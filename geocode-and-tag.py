@@ -113,7 +113,8 @@ for story in stories:
         raise Exception('Story (stories_id=%s) has no story_sentences' % (story['stories_id']) )
     if 'corenlp' not in story:
         raise Exception('Story (stories_id=%s) has no corenlp' % (story['stories_id']) )
-    del story['corenlp']['_']
+    if '_' in story['corenlp']:
+        del story['corenlp']['_']
     to_process.append(story)
 log.info("Queued "+str(len(to_process))+" stories")
 

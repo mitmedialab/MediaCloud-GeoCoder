@@ -113,6 +113,9 @@ for story in stories:
         raise Exception('Story (stories_id=%s) has no story_sentences' % (story['stories_id']) )
     if 'corenlp' not in story:
         raise Exception('Story (stories_id=%s) has no corenlp' % (story['stories_id']) )
+    if 'annotated' in story['corenlp']:
+        if story['corenlp']['annotated']=="false":
+            log.warn('Story %s says corenlp/annotated = false... skipping it')
     if '_' in story['corenlp']:
         del story['corenlp']['_']
     to_process.append(story)

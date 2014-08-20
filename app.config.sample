@@ -1,11 +1,11 @@
-
 [mediacloud]
 key = MY_API_KEY
 media_id = 1
+last_processed_stories_id = 0
 
 [threading]
 num_threads = 15
 
 [cliff]
-host=http://127.0.0.1
-port=8080
+host = http://127.0.0.1
+port = 8080

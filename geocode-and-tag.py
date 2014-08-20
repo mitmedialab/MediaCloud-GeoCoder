@@ -109,16 +109,20 @@ stories = mc.storyList(
     corenlp=True)
 log.info("  fetched %d stories",len(stories))
 for story in stories:
+    ok = True
     if 'story_sentences' not in story:
-        raise Exception('Story (stories_id=%s) has no story_sentences' % (story['stories_id']) )
+        log.warn('Story (stories_id=%s) has no story_sentences' % (story['stories_id']) )
+        ok = False
     if 'corenlp' not in story:
-        raise Exception('Story (stories_id=%s) has no corenlp' % (story['stories_id']) )
-    if 'annotated' in story['corenlp']:
-        if story['corenlp']['annotated']=="false":
-            log.warn('Story %s says corenlp/annotated = false... skipping it' % story['stories_id'])
-    if '_' in story['corenlp']:
-        del story['corenlp']['_']
-    to_process.append(story)
+        log.warn('Story (stories_id=%s) has no corenlp' % (story['stories_id']) )
+        ok = False
+    if not 'processed_stories_id' in story:
+        log.warn('Story %s says not processed yet - skipping it' % story['stories_id'])
+        ok = False
+    if ok:
+        if '_' in story['corenlp']:
+            del story['corenlp']['_']
+        to_process.append(story)
 log.info("Queued "+str(len(to_process))+" stories")
 
 # start up the geocoding engine

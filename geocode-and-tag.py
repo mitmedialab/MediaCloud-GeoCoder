@@ -13,8 +13,6 @@ import mediacloud
 import mediameter.cliff
 
 POST_WRITE_BACK = True
-STORIES_AT_TIME = 100
-PLACE_TAG_SET_NAME = "rahulb@media.mit.edu"
 
 logging.basicConfig(filename='geocoder.log',level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -26,6 +24,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 config = ConfigParser.ConfigParser()
 config_file_path = os.path.join(current_dir,'app.config')
 config.read(config_file_path)
+stories_to_fetch = int(config.get('mediacloud','stories_per_fetch'))
+place_tag_set_name = config.get('mediacloud','place_tag_set_name')
 
 # connect to everything
 mc = mediacloud.api.WriteableMediaCloud(config.get('mediacloud','key'))
@@ -57,17 +57,17 @@ class Engine:
                         if 'countries' in cliff_results['results']['places']['focus']:
                             for country in cliff_results['results']['places']['focus']['countries']:
                                 story_tags.append( mediacloud.api.StoryTag(
-                                    story['stories_id'], PLACE_TAG_SET_NAME, 'geonames_'+str(country['id'])) )
+                                    story['stories_id'], place_tag_set_name, 'geonames_'+str(country['id'])) )
                                 log.debug("  focus country: %s on %s" % (country['name'],story['stories_id']) )
                         if 'states' in cliff_results['results']['places']['focus']:
                             for state in cliff_results['results']['places']['focus']['states']:
                                 story_tags.append( mediacloud.api.StoryTag(
-                                    story['stories_id'], PLACE_TAG_SET_NAME, 'geonames_'+str(state['id'])) )
+                                    story['stories_id'], place_tag_set_name, 'geonames_'+str(state['id'])) )
                                 log.debug("  focus state: %s on %s" % (state['name'],story['stories_id']) )
                         sentence_tags = []
                         for mention in cliff_results['results']['places']['mentions']:
                             sentence_tags.append( mediacloud.api.SentenceTag(
-                                mention['source']['storySentencesId'], PLACE_TAG_SET_NAME, 'geonames_'+str(mention['id']) ))
+                                mention['source']['storySentencesId'], place_tag_set_name, 'geonames_'+str(mention['id']) ))
                             log.debug("  mentions: %s on %s" % (mention['name'],mention['source']['storySentencesId']) )
                         log.info("  parsed %s - found %d focus, %d mentions " % (story['stories_id'],len(story_tags),len(sentence_tags)) )
                         # need to do a write-back query here...
@@ -104,7 +104,7 @@ stories = mc.storyList(
     solr_query='*', 
     solr_filter='+media_id:'+media_id, 
     last_processed_stories_id=last_processed_stories_id, 
-    rows=STORIES_AT_TIME, 
+    rows=stories_to_fetch, 
     raw_1st_download=False, 
     corenlp=True)
 log.info("  fetched %d stories",len(stories))
@@ -130,4 +130,4 @@ with open(config_file_path, 'wb') as configfile:
 # log some stats about the run
 durationSecs = float(time.time() - start_time)
 log.info("Took %d seconds" % durationSecs)
-log.info( str(round(durationSecs/STORIES_AT_TIME,4) )+" secs per story" )
+log.info( str(round(durationSecs/stories_to_fetch,4) )+" secs per story" )

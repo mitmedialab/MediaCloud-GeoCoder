@@ -116,8 +116,11 @@ for story in stories:
     if 'corenlp' not in story:
         log.warn('Story (stories_id=%s) has no corenlp' % (story['stories_id']) )
         ok = False
-    if not 'processed_stories_id' in story:
+    if 'processed_stories_id' not in story:
         log.warn('Story %s says not processed yet - skipping it' % story['stories_id'])
+        ok = False
+    if ('annotated' in story['corenlp']) and (story['corenlp']['annotated']=='false'):
+        log.warn('Story %s says it is not annotated - skipping it' % story['stories_id'])
         ok = False
     if ok:
         if '_' in story['corenlp']:

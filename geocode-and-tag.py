@@ -107,6 +107,7 @@ stories = mc.storyList(
     rows=stories_to_fetch, 
     raw_1st_download=False, 
     corenlp=True)
+mc_fetched_time = time.time()
 log.info("  fetched %d stories",len(stories))
 for story in stories:
     ok = True
@@ -139,6 +140,9 @@ with open(config_file_path, 'wb') as configfile:
     config.write(configfile)
 
 # log some stats about the run
-durationSecs = float(time.time() - start_time)
-log.info("Took %d seconds" % durationSecs)
-log.info( str(round(durationSecs/stories_to_fetch,4) )+" secs per story" )
+duration_secs = float(time.time() - start_time)
+mc_fetch_secs = float(mc_fetched_time - start_time)
+log.info("Took %d seconds" % duration_secs)
+log.info("  fetching from MC took %d" % mc_fetch_secs)
+log.info("  cliff & write-back took %d" % (duration_secs - mc_fetch_secs))
+log.info( str(round(duration_secs/stories_to_fetch,4) )+" secs per story overall" )

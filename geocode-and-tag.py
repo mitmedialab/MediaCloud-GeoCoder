@@ -14,10 +14,14 @@ import mediameter.cliff
 
 POST_WRITE_BACK = True
 
+# set up logging
 logging.basicConfig(filename='geocoder.log',level=logging.INFO)
 log = logging.getLogger(__name__)
 log.info("---------------------------------------------------------------------------")
 start_time = time.time()
+requests_logger = logging.getLogger('requests')
+requests_logger.propagate = False
+requests_logger.setLevel(logging.WARN)
 
 # load shared config file
 current_dir = os.path.dirname(os.path.abspath(__file__))

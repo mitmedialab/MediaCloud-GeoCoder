@@ -1,3 +1,6 @@
+[queue]
+url = redis://localhost:6379/0
+
 [mediacloud]
 key = MY_API_KEY
 media_id = 1

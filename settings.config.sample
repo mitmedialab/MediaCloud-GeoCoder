@@ -6,10 +6,7 @@ key = MY_API_KEY
 media_id = 1
 last_processed_stories_id = 0
 stories_per_fetch = 100
-place_tag_set_name = rahulb@media.mit.edu
-
-[threading]
-num_threads = 15
+place_tag_set_name = your-email@your.host.com
 
 [cliff]
 host = http://127.0.0.1

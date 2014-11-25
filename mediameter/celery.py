@@ -4,11 +4,11 @@ from celery import Celery
 from mediameter import settings
 
 app = Celery('mediameter',
-             broker=settings.get('queue','url'),
-             backend=settings.get('queue','url'),
+             broker=settings.get('queue','broker_url'),
+             backend=settings.get('queue','backend_url'),
              include=['mediameter.tasks'])
 
-# Optional configuration, see the application user guide.
+# expire backend results in one hour
 app.conf.update(
     CELERY_TASK_RESULT_EXPIRES=3600,
 )

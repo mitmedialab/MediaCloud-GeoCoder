@@ -31,8 +31,8 @@ def geocode(story):
                 sentence_tags.append( mediacloud.api.SentenceTag(
                     mention['source']['storySentencesId'], place_tag_set_name, 'geonames_'+str(mention['id']) ))
                 logger.debug("  mentions: %s on %s" % (mention['name'],mention['source']['storySentencesId']) )
-            logger.info("  parsed %s (%s)- found %d focus, %d mentions " % 
-                (story['stories_id'],story['publish_date'],len(story_tags),len(sentence_tags)) )
+            logger.info("  parsed %s - found %d focus, %d mentions " % 
+                (story['stories_id'],len(story_tags),len(sentence_tags)) )
             # need to do a write-back query here...
             if POST_WRITE_BACK:
                 if len(story_tags)>0:

@@ -36,12 +36,12 @@ def geocode(story):
             # need to do a write-back query here...
             if POST_WRITE_BACK:
                 if len(story_tags)>0:
-                    results = mc_server.tagStories(story_tags)
+                    results = mc_server.tagStories(story_tags, clear_others=True)
                     if len(results)!=len(story_tags):
                         logger.error("  Tried to push %d story tags to story %s, but only got %d response", 
                             (len(story_tags),story['stories_id'],len(results)))
                 if len(sentence_tags)>0:
-                    results = mc_server.tagSentences(sentence_tags)
+                    results = mc_server.tagSentences(sentence_tags, clear_others=True)
                     if len(results)!=len(sentence_tags):
                         logger.error("  Tried to push %d sentence tags to story %s, but only got %d response", 
                             (len(sentence_tags),story['stories_id'],len(results)))

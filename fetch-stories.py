@@ -12,7 +12,6 @@ log = logging.getLogger(__name__)
 log.info("---------------------------------------------------------------------------")
 start_time = time.time()
 requests_logger = logging.getLogger('requests')
-requests_logger.propagate = False
 requests_logger.setLevel(logging.WARN)
 
 stories_to_fetch = settings.get('mediacloud','stories_per_fetch')

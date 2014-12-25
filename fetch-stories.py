@@ -19,14 +19,14 @@ stories_to_fetch = settings.get('mediacloud','stories_per_fetch')
 log.info("Fetching %s stories from MediaCloud to geocode" % stories_to_fetch)
 
 # load the relevant settings
-media_id = settings.get('mediacloud','media_id')
+solr_filter = settings.get('mediacloud','solr_filter')
 last_processed_stories_id = settings.get('mediacloud','last_processed_stories_id')
 log.info("  starting at stories_processed_id %s" % last_processed_stories_id)
 to_process = []
 
 # Fetch some story ids and queue them up to get NLP results
 stories = mc_server.storyList(
-    solr_query='*', solr_filter='+media_id:'+media_id, 
+    solr_query='*', solr_filter=solr_filter, 
     last_processed_stories_id=last_processed_stories_id, rows=stories_to_fetch, 
     raw_1st_download=False, show_sentences=False, show_text=False, corenlp=False)
 story_time = time.time()

@@ -4,7 +4,7 @@ backend_url = redis://localhost:6379/1
 
 [mediacloud]
 key = MY_API_KEY
-media_id = 1
+solr_filter = +media_id:1
 last_processed_stories_id = 0
 stories_per_fetch = 100
 place_tag_set_name = your-email@your.host.com

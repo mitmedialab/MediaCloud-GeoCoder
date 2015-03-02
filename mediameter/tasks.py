@@ -28,9 +28,18 @@ def geocode(story):
                     logger.debug("  focus state: %s on %s" % (state['name'],story['stories_id']) )
             sentence_tags = []
             for mention in cliff_results['results']['places']['mentions']:
+                # add in the place mentioned
                 sentence_tags.append( mediacloud.api.SentenceTag(
                     mention['source']['storySentencesId'], place_tag_set_name, 'geonames_'+str(mention['id']) ))
                 logger.debug("  mentions: %s on %s" % (mention['name'],mention['source']['storySentencesId']) )
+                # add in the state and country associated with this place
+                if len(str(mention['countryGeoNameId'])) > 0:
+                    sentence_tags.append( mediacloud.api.SentenceTag(
+                        mention['source']['storySentencesId'], place_tag_set_name, 'geonames_'+str(mention['countryGeoNameId']) ))
+                if len(str(mention['stateGeoNameId'])) > 0:
+                    sentence_tags.append( mediacloud.api.SentenceTag(
+                        mention['source']['storySentencesId'], place_tag_set_name, 'geonames_'+str(mention['stateGeoNameId']) ))
+                logger.debug("    in %s / %s" % (mention['countryGeoNameId'],mention['stateGeoNameId']) )
             logger.info("  parsed %s - found %d focus, %d mentions " % 
                 (story['stories_id'],len(story_tags),len(sentence_tags)) )
             # need to do a write-back query here...

@@ -34,20 +34,23 @@ story_ids = [story['stories_id'] for story in stories]
 last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 
 # Now take all the story ids and ask for Core NLP results for them
-stories = mc_server.storyCoreNlpList(story_ids)
-for story in stories:
-    ok = True
-    if 'corenlp' not in story:
-        log.warn('Story %s has no corenlp results' % (story['stories_id']) )
-        ok = False
-    if story['corenlp'] == mc_server.MSG_CORE_NLP_NOT_ANNOTATED:
-        log.warn('Story %s says it is not annotated - skipping it' % (story['stories_id']) )
-        ok = False
-    if ok:
-        if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
-            del story['corenlp']['_']
-        to_process.append(story)
-nlp_time = time.time()
+try:
+    stories = mc_server.storyCoreNlpList(story_ids)
+    for story in stories:
+        ok = True
+        if 'corenlp' not in story:
+            log.warn('Story %s has no corenlp results' % (story['stories_id']) )
+            ok = False
+        if story['corenlp'] == mc_server.MSG_CORE_NLP_NOT_ANNOTATED:
+            log.warn('Story %s says it is not annotated - skipping it' % (story['stories_id']) )
+            ok = False
+        if ok:
+            if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
+                del story['corenlp']['_']
+            to_process.append(story)
+    nlp_time = time.time()
+except ValueError as e:
+    log.exception(e)
 
 # push them all into the queue
 for story in to_process:

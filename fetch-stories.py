@@ -4,6 +4,8 @@ import requests
 import mediameter.tasks
 from mediameter import settings, mc_server
 
+CORE_NLP_QUERY_STORY_COUNT = 200
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # set up logging
@@ -34,22 +36,31 @@ story_ids = [story['stories_id'] for story in stories]
 last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 
 # Now take all the story ids and ask for Core NLP results for them
-try:
-    stories = mc_server.storyCoreNlpList(story_ids)
-    for story in stories:
-        ok = True
-        if 'corenlp' not in story:
-            log.warn('Story %s has no corenlp results' % (story['stories_id']) )
-            ok = False
-        if story['corenlp'] == mc_server.MSG_CORE_NLP_NOT_ANNOTATED:
-            log.warn('Story %s says it is not annotated - skipping it' % (story['stories_id']) )
-            ok = False
-        if ok:
-            if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
-                del story['corenlp']['_']
-            to_process.append(story)
-except ValueError as e:
-    log.exception(e)
+# We need to chunk this into batches of 200 or so to not hit the HTTP POST character limit :-(
+story_id_batches=[story_ids[x:x+CORE_NLP_QUERY_STORY_COUNT] for x in xrange(0, len(story_ids), CORE_NLP_QUERY_STORY_COUNT)]
+batch = 1
+for story_ids_batch in story_id_batches:
+    try:
+        log.debug('  Fetch batch %d' % batch)
+        stories = mc_server.storyCoreNlpList(story_ids_batch)
+        added_for_processing_count = 0
+        for story in stories:
+            ok = True
+            if 'corenlp' not in story:
+                log.warn('    Story %s has no corenlp results' % (story['stories_id']) )
+                ok = False
+            if story['corenlp'] == mc_server.MSG_CORE_NLP_NOT_ANNOTATED:
+                log.warn('    Story %s says it is not annotated - skipping it' % (story['stories_id']) )
+                ok = False
+            if ok:
+                if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
+                    del story['corenlp']['_']
+                to_process.append(story)
+                added_for_processing_count = added_for_processing_count + 1
+        log.debug('    fetched %d stories, added %d for processing' % (len(stories),added_for_processing_count))
+    except ValueError as e:
+        log.exception(e)
+    batch = batch + 1
 nlp_time = time.time()
 
 # push them all into the queue

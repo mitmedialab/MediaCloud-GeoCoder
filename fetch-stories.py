@@ -48,9 +48,9 @@ try:
             if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
                 del story['corenlp']['_']
             to_process.append(story)
-    nlp_time = time.time()
 except ValueError as e:
     log.exception(e)
+nlp_time = time.time()
 
 # push them all into the queue
 for story in to_process:

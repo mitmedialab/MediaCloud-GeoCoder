@@ -12,10 +12,7 @@ First install the [MediaCloud API client library](https://github.com/c4fcm/Media
 Then install these python dependencies:
 
 ```
-pip install requests
-pip install redis
-pip install celery
-pip install celery[redis]
+pip install -r requirements.pip
 ```
 
 Now you need to set up a Redis queue somewhere:

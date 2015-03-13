@@ -29,7 +29,7 @@ to_process = []
 stories = mc_server.storyList(
     solr_query='*', solr_filter=solr_filter, 
     last_processed_stories_id=last_processed_stories_id, rows=stories_to_fetch, 
-    raw_1st_download=False, show_sentences=False, show_text=False, corenlp=False)
+    raw_1st_download=False, sentences=False, text=False, corenlp=False)
 story_time = time.time()
 log.info("  fetched %d stories",len(stories))
 story_ids = [story['stories_id'] for story in stories]

@@ -23,7 +23,6 @@ log.info("Fetching %s stories from MediaCloud to geocode" % stories_to_fetch)
 solr_filter = settings.get('mediacloud','solr_filter')
 last_processed_stories_id = settings.get('mediacloud','last_processed_stories_id')
 log.info("  starting at stories_processed_id %s" % last_processed_stories_id)
-to_process = []
 
 # Fetch some story ids and queue them up to get NLP results
 stories = mc_server.storyList(
@@ -37,6 +36,9 @@ last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 
 # Now take all the story ids and ask for Core NLP results for them
 # We need to chunk this into batches of 200 or so to not hit the HTTP POST character limit :-(
+no_corenlp = 0
+not_annotated = 0
+processed = 0
 story_id_batches=[story_ids[x:x+CORE_NLP_QUERY_STORY_COUNT] for x in xrange(0, len(story_ids), CORE_NLP_QUERY_STORY_COUNT)]
 batch = 1
 for story_ids_batch in story_id_batches:
@@ -48,25 +50,26 @@ for story_ids_batch in story_id_batches:
             ok = True
             if 'corenlp' not in story:
                 log.warn('    Story %s has no corenlp results' % (story['stories_id']) )
+                no_corenlp = no_corenlp+1
                 ok = False
             if story['corenlp'] == mc_server.MSG_CORE_NLP_NOT_ANNOTATED:
                 log.warn('    Story %s says it is not annotated - skipping it' % (story['stories_id']) )
+                not_annotated = not_annotated + 1
                 ok = False
             if ok:
                 if '_' in story['corenlp']: # remove the story-sentence list because it doesn't reference sentence_id
                     del story['corenlp']['_']
-                to_process.append(story)
-                added_for_processing_count = added_for_processing_count + 1
-        log.debug('    fetched %d stories, added %d for processing' % (len(stories),added_for_processing_count))
+                mediameter.tasks.geocode.delay(story)   # queue it up for geocoding
+                processed = processed + 1
+        log.debug('    fetched %d stories, added %d for processing' % (len(stories),processed))
     except ValueError as e:
         log.exception(e)
     batch = batch + 1
 nlp_time = time.time()
-
-# push them all into the queue
-for story in to_process:
-    mediameter.tasks.geocode.delay(story)
-log.info("  queued "+str(len(to_process))+" stories")
+    
+log.info("  queued %d stories" % processed)
+log.info("  no_corenlp on %d" % no_corenlp)
+log.info("  not_annotated on %d" % not_annotated)
 
 # and save that we've made progress
 settings.set('mediacloud','last_processed_stories_id',last_processed_stories_id)

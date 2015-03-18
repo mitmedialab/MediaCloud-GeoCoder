@@ -32,7 +32,8 @@ stories = mc_server.storyList(
 story_time = time.time()
 log.info("  fetched %d stories",len(stories))
 story_ids = [story['stories_id'] for story in stories]
-last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
+if len(story_ids) > 0:
+    last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 
 # Now take all the story ids and ask for Core NLP results for them
 # We need to chunk this into batches of 200 or so to not hit the HTTP POST character limit :-(

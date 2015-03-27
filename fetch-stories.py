@@ -12,7 +12,7 @@ CORE_NLP_QUERY_STORY_COUNT = 200
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # set up logging
-logging.basicConfig(filename=os.path.join(current_dir,'fetcher.log'),level=logging.DEBUG)
+logging.basicConfig(filename=os.path.join(current_dir,'fetcher.log'),level=logging.INFO)
 log = logging.getLogger(__name__)
 log.info("---------------------------------------------------------------------------")
 start_time = time.time()

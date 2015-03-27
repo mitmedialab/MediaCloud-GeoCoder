@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import json
 from celery.utils.log import get_task_logger
 import mediacloud.api
 from mediameter.celery import app
@@ -9,8 +10,16 @@ logger = get_task_logger(__name__)
 POST_WRITE_BACK = True
 
 @app.task(serializer='json')
-def geocode(story):
+def geocode_from_sentences(story):
+    cliff_results = cliff_server.parseSentences(story['story_sentences'])
+    _post_tags_from_cliff_results(story, cliff_results)
+
+@app.task(serializer='json')
+def geocode_from_nlp(story):
     cliff_results = cliff_server.parseNlpJson(story['corenlp'])
+    _post_tags_from_cliff_results(story, cliff_results)
+
+def _post_tags_from_cliff_results(story,cliff_results):
     place_tag_set_name = settings.get('mediacloud','place_tag_set_name')
     try:
         if cliff_results['status'] == cliff_server.STATUS_OK:

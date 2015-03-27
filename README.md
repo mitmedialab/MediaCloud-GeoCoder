@@ -32,6 +32,9 @@ First you need to run the `fetch-stories.py` script load stories into the queue 
 
 Then run the the Celery work server to geocode to stories and post results back to MediaCloud: `celery -A mediameter worker -l info`.
 
-If you set up Celery as a [service on Ubuntu](http://celery.readthedocs.org/en/latest/tutorials/daemonizing.html#init-script-celeryd) then you can run `/etc/init.d/celeryd start` to start the service.
+If you set up Celery as a [service on Ubuntu](http://celery.readthedocs.org/en/latest/tutorials/daemonizing.html#init-script-celeryd) then you can run `sudo service celeryd start` to start the service:
+* copy the [daemon script](https://raw.githubusercontent.com/ask/celery/master/contrib/generic-init.d/celeryd) to `/etc/init.d/celeryd' and make it executable
+* copy the [example configuration](http://celery.readthedocs.org/en/latest/tutorials/daemonizing.html#example-configuration) to `/etc/default/celeryd` and change the `CELERYD_NODES` name to something you will recognize, change `CELERY_BIN` and `CELERY_CHDIR` to point at your virtualenv, set `CELERYD_LOG_LEVEL= "DEBUG"` if you want more logging
+* create a new unpriveleged celery user: `sudo groupadd celery; sudo useradd -g celery celery`
 
 If you need to empty out all your queues, just `redis-cli flushall`.

@@ -72,8 +72,8 @@ def _post_tags_from_cliff_results(story,cliff_results):
         logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )
         raise self.retry(exc=ke)
     except ValueError as ve:
-        logger.exception("ValueError - probably no json object could be decoded (results=%s)" %  )
+        logger.exception("ValueError - probably no json object could be decoded (results=%s)" % json.dumps(cliff_results) )
         raise self.retry(exc=ve)
     except mediacloud.error.MCException as mce:
-        logger.exception("MCException - probably got an error note in the results from mediacloud (results=%s)" %  )
+        logger.exception("MCException - probably got an error note in the results from mediacloud (results=%s)" % json.dumps(cliff_results) )
         raise self.retry(exc=mce)

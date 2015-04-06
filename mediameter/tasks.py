@@ -25,7 +25,7 @@ def geocode_from_sentences(self,story):
         raise self.retry(exc=mce)
     except Exception as e:
         logger.exception("Exception - something bad happened")
-        raise self.retry(exc=ve)
+        raise self.retry(exc=e)
 
 @app.task(serializer='json',bind=True)
 def geocode_from_nlp(self,story):
@@ -43,7 +43,7 @@ def geocode_from_nlp(self,story):
         raise self.retry(exc=mce)
     except Exception as e:
         logger.exception("Exception - something bad happened")
-        raise self.retry(exc=ve)
+        raise self.retry(exc=e)
 
 def _post_tags_from_cliff_results(story,cliff_results):
     '''

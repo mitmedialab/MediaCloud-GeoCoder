@@ -10,7 +10,7 @@ logger = get_task_logger(__name__)
 POST_WRITE_BACK = True
 
 @app.task(serializer='json',bind=True)
-def geocode_from_sentences(story):
+def geocode_from_sentences(self,story):
     try:
         cliff_results = cliff_server.parseSentences(story['story_sentences'])
         _post_tags_from_cliff_results(story, cliff_results)
@@ -28,7 +28,7 @@ def geocode_from_sentences(story):
         raise self.retry(exc=ve)
 
 @app.task(serializer='json',bind=True)
-def geocode_from_nlp(story):
+def geocode_from_nlp(self,story):
     try:
         cliff_results = cliff_server.parseNlpJson(story['corenlp'])
         _post_tags_from_cliff_results(story, cliff_results)

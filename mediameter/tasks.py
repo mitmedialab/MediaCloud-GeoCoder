@@ -9,7 +9,7 @@ logger = get_task_logger(__name__)
 
 POST_WRITE_BACK = True
 
-@app.task(serializer='json')
+@app.task(serializer='json',bind=True)
 def geocode_from_sentences(story):
     try:
         cliff_results = cliff_server.parseSentences(story['story_sentences'])
@@ -27,7 +27,7 @@ def geocode_from_sentences(story):
         logger.exception("Exception - something bad happened")
         raise self.retry(exc=ve)
 
-@app.task(serializer='json')
+@app.task(serializer='json',bind=True)
 def geocode_from_nlp(story):
     try:
         cliff_results = cliff_server.parseNlpJson(story['corenlp'])

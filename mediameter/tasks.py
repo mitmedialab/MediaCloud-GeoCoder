@@ -14,6 +14,9 @@ def geocode_from_sentences(story):
     try:
         cliff_results = cliff_server.parseSentences(story['story_sentences'])
         _post_tags_from_cliff_results(story, cliff_results)
+    except KeyError as ke:
+        logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )
+        raise self.retry(exc=ke)
     except ValueError as ve:
         logger.exception("ValueError - probably no json object could be decoded (results=%s)" % json.dumps(cliff_results) )
         raise self.retry(exc=ve)
@@ -27,7 +30,9 @@ def geocode_from_sentences(story):
 @app.task(serializer='json')
 def geocode_from_nlp(story):
     try:
-        except KeyError as ke:
+        cliff_results = cliff_server.parseNlpJson(story['corenlp'])
+        _post_tags_from_cliff_results(story, cliff_results)
+    except KeyError as ke:
         logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )
         raise self.retry(exc=ke)
     except ValueError as ve:

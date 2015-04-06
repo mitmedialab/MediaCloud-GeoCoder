@@ -68,5 +68,12 @@ def _post_tags_from_cliff_results(story,cliff_results):
         else:
             # cliff_server had an error :-()
             logger.error("Story (stories_id %s) failed: %s" % (story['stories_id'], cliff_results['details']) )
-    except KeyError as e:
-        logger.error("Couldn't parse response from cliff_server! "+json.dumps(cliff_results))
+    except KeyError as ke:
+        logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )
+        raise self.retry(exc=ke)
+    except ValueError as ve:
+        logger.exception("ValueError - probably no json object could be decoded (results=%s)" %  )
+        raise self.retry(exc=ve)
+    except mediacloud.error.MCException as mce:
+        logger.exception("MCException - probably got an error note in the results from mediacloud (results=%s)" %  )
+        raise self.retry(exc=mce)

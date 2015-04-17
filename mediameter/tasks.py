@@ -12,7 +12,7 @@ POST_WRITE_BACK = True
 @app.task(serializer='json',bind=True)
 def geocode_from_sentences(self,story):
     try:
-        cliff_results = cliff_server.parseSentences(story['story_sentences'])
+        cliff_results = cliff_server.parseSentences(story['story_sentences'],True)
         _post_tags_from_cliff_results(story, cliff_results)
     except KeyError as ke:
         logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )
@@ -30,7 +30,7 @@ def geocode_from_sentences(self,story):
 @app.task(serializer='json',bind=True)
 def geocode_from_nlp(self,story):
     try:
-        cliff_results = cliff_server.parseNlpJson(story['corenlp'])
+        cliff_results = cliff_server.parseNlpJson(story['corenlp'],True)
         _post_tags_from_cliff_results(story, cliff_results)
     except KeyError as ke:
         logger.exception("Couldn't parse response from cliff_server! %s" % json.dumps(cliff_results) )

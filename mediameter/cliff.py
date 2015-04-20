@@ -6,9 +6,9 @@ class Cliff():
     Make requests to a CLIFF geo-parsing / NER server
     '''
 
-    PARSE_TEXT_PATH = "/CLIFF-1.3.0/parse/text"
-    PARSE_SENTENCES_PATH = "/CLIFF-1.3.0/parse/sentences"
-    PARSE_NLP_JSON_PATH = "/CLIFF-1.3.0/parse/json"
+    PARSE_TEXT_PATH = "/CLIFF-1.4.1/parse/text"
+    PARSE_SENTENCES_PATH = "/CLIFF-1.4.1/parse/sentences"
+    PARSE_NLP_JSON_PATH = "/CLIFF-1.4.1/parse/json"
 
     JSON_PATH_TO_ABOUT_COUNTRIES = 'results.places.about.countries';
 

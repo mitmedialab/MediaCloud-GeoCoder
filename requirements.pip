@@ -1,3 +1,5 @@
-requests
+requests[security]
 redis
 celery
+mediameter-cliff
+mediacloud

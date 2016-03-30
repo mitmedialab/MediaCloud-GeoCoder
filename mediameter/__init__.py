@@ -1,7 +1,7 @@
 import os, ConfigParser
 
 import mediacloud.api
-import mediameter.cliff
+from mediameter.cliff import Cliff
 
 def get_settings_file_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,4 +14,4 @@ settings.read(get_settings_file_path())
 
 # connect to everything
 mc_server = mediacloud.api.AdminMediaCloud(settings.get('mediacloud','key'))
-cliff_server = mediameter.cliff.Cliff(settings.get('cliff','host'),settings.get('cliff','port'))
+cliff_server = Cliff(settings.get('cliff','host'),settings.get('cliff','port'))

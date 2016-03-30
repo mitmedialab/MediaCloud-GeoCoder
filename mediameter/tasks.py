@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-import json
+import json, logging
 from celery.utils.log import get_task_logger
 import mediacloud.api
 from mediameter.celery import app
@@ -12,6 +12,9 @@ POST_WRITE_BACK = True
 @app.task(serializer='json',bind=True)
 def geocode_from_sentences(self,story):
     try:
+        # HACK: for now force id to a string - we need to fix the cliff side of this later
+        for sentence in story['story_sentences']:
+            sentence['story_sentences_id'] = str(sentence['story_sentences_id'])
         cliff_results = cliff_server.parseSentences(story['story_sentences'],True)
         _post_tags_from_cliff_results(story, cliff_results)
     except KeyError as ke:

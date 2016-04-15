@@ -2,4 +2,4 @@ requests[security]
 redis
 celery
 mediameter-cliff
-mediacloud
+mediacloud==2.26.1

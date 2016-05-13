@@ -1,5 +1,4 @@
 import os, ConfigParser
-
 import mediacloud.api
 from mediameter.cliff import Cliff
 

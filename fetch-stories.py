@@ -40,9 +40,8 @@ if content_to_use == CONTENT_NLP:
         solr_query='*', solr_filter=solr_filter, 
         last_processed_stories_id=last_processed_stories_id, rows=stories_to_fetch)
     story_time = time.time()
-    log.info("  fetched {} stories".format(len(stories)))
     story_ids = [story['stories_id'] for story in stories if story['language'] in [None,'en']]
-    log.info("    removed {} in english".format(len(story_ids)))
+    log.info("  fetched {} stories ({} in english)".format(len(stories),len(story_ids)))
     if len(story_ids) > 0:
         last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 

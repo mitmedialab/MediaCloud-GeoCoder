@@ -42,7 +42,7 @@ if content_to_use == CONTENT_NLP:
     story_time = time.time()
     story_ids = [story['stories_id'] for story in stories if story['language'] in [None,'en']]
     log.info("  fetched {} stories ({} in english)".format(len(stories),len(story_ids)))
-    if len(story_ids) > 0:
+    if len(stories) > 0:
         last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
 
     # Now take all the story ids and ask for Core NLP results for them

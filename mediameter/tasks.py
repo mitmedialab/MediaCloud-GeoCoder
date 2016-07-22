@@ -28,7 +28,7 @@ def geocode_from_sentences(self,story):
         logger.error("MCException - probably got an error note in the results from mediacloud (results={})".format(json.dumps(cliff_results)) )
         raise self.retry(exc=mce)
     except Exception as e:
-        logger.error("Exception - something bad happened")
+        logger.exception("Exception - something bad happened")
         raise self.retry(exc=e)
 
 @app.task(serializer='json',bind=True)
@@ -46,7 +46,7 @@ def geocode_from_nlp(self,story):
         logger.error("MCException - probably got an error note in the results from mediacloud (results={})".format(json.dumps(cliff_results)) )
         raise self.retry(exc=mce)
     except Exception as e:
-        logger.error("Exception - something bad happened")
+        logger.exception("Exception - something bad happened")
         raise self.retry(exc=e)
 
 def _post_tags_from_cliff_results(story,cliff_results):

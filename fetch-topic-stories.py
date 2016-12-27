@@ -41,7 +41,7 @@ if content_to_use == CONTENT_NLP:
     stories = mc_server.topicStoryList(topic_id, link_id=next_link_id, limit=stories_to_fetch)
     story_time = time.time()
     story_ids = [story['stories_id'] for story in stories['stories'] if story['language'] in [None,'en']]
-    log.info("  fetched {} stories ({} in english)".format(len(stories),len(story_ids)))
+    log.info("  fetched {} stories ({} in english)".format(len(stories['stories']),len(story_ids)))
     if 'next' in stories['link_ids']:
         next_link_id = stories['link_ids']['next']
 

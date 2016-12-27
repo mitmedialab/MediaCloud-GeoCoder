@@ -6,6 +6,7 @@ from mediameter.celery import app
 from mediameter import settings, mc_server, cliff_server
 
 # The huge tag set that has one tag for each place we've identified in any story
+GEONAMES_TAG_SET_ID = 1011
 GEONAMES_TAG_SET_NAME = 'mc-geocoder@media.mit.edu'
 GEONAMES_TAG_PREFIX = 'geonames_'
 # The tag set that holds one tag for each version of the geocoder we use

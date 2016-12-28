@@ -3,6 +3,8 @@ import requests
 import mediameter.tasks
 from mediameter import settings, mc_server
 
+GEOCODE_UNANNOTATED = False
+
 CONTENT_NLP = "nlp"
 CONTENT_SENTENCES = "sentences"
 
@@ -83,30 +85,31 @@ while more_stories:
         except ValueError:
             log.error("Error while fetching corenlp for set of stories",exc_info=True)
         batch = batch + 1
-    # done with core_nlp, now need to do any non-annotated by raw sentences
-    log.info("    need to do {} from sentences".format(len(do_by_sentences)))
-    stories = [mc_server.story(sid, sentences=True) for sid in do_by_sentences]
-    #mc_server.storyList(
-    #    solr_query='stories_id:('+' '.join(do_by_sentences)+')',
-    #    rows=len(do_by_sentences),
-    #    sentences=True)
-    log.info("      fetched {} sentence stories".format(len(stories)))
     no_sentences = 0
-    processed = 0
-    try:
-        for story in stories:
-            ok = True
-            if 'story_sentences' not in story:
-                log.warn("    Story {} has no sentences results".format(story['stories_id']) )
-                no_sentences = no_sentences+1
-                ok = False
-            if ok:
-                log.debug("    queued story {} for processing".format(story['stories_id']))
-                mediameter.tasks.geocode_from_sentences.delay(story)   # queue it up for geocoding
-                processed = processed + 1
-        log.debug("    fetched {} stories, added {} for processing".format(len(stories),processed))
-    except ValueError as e:
-        log.exception(e)
+    if GEOCODE_UNANNOTATED:
+        # done with core_nlp, now need to do any non-annotated by raw sentences
+        log.info("    need to do {} from sentences".format(len(do_by_sentences)))
+        stories = [mc_server.story(sid, sentences=True) for sid in do_by_sentences]
+        #mc_server.storyList(
+        #    solr_query='stories_id:('+' '.join(do_by_sentences)+')',
+        #    rows=len(do_by_sentences),
+        #    sentences=True)
+        log.info("      fetched {} sentence stories".format(len(stories)))
+        processed = 0
+        try:
+            for story in stories:
+                ok = True
+                if 'story_sentences' not in story:
+                    log.warn("    Story {} has no sentences results".format(story['stories_id']) )
+                    no_sentences = no_sentences+1
+                    ok = False
+                if ok:
+                    log.debug("    queued story {} for processing".format(story['stories_id']))
+                    mediameter.tasks.geocode_from_sentences.delay(story)   # queue it up for geocoding
+                    processed = processed + 1
+            log.debug("    fetched {} stories, added {} for processing".format(len(stories),processed))
+        except ValueError as e:
+            log.exception(e)
     content_time = time.time()    
     log.info("    queued {} sentence stories".format(processed) )
     log.info("    no_sentences on {}".format(no_sentences) )

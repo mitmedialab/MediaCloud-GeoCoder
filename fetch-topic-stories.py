@@ -22,34 +22,39 @@ requests_logger.setLevel(logging.WARN)
 
 stories_to_fetch = settings.get('mediacloud','stories_per_fetch')
 content_to_use = settings.get('mediacloud','content')
-log.info("Fetching {} stories (in {} format) from MediaCloud to geocode".format(stories_to_fetch,content_to_use) )
+log.info("Fetching {} stories by page (in {} format) from MediaCloud to geocode".format(stories_to_fetch,content_to_use) )
 
 # load the relevant settings
 topic_id = settings.get('mediacloud','topic_id')
 log.info("  topic_id: {}".format(topic_id))
-next_link_id = settings.get('mediacloud','next_link_id')
-if next_link_id == '0':
-    next_link_id = None
-log.info("  starting at next_link_id {}".format(next_link_id) )
+
+next_link_id = None
 
 story_time = None
 content_time = None
 
-if content_to_use == CONTENT_NLP:
+more_stories = True
+
+while more_stories:
 
     # Fetch some story ids and queue them up to get NLP results
+    log.info("Fetch link_id {}".format(next_link_id))
     stories = mc_server.topicStoryList(topic_id, link_id=next_link_id, limit=stories_to_fetch)
     story_time = time.time()
     story_ids = [story['stories_id'] for story in stories['stories'] if story['language'] in [None,'en']]
     log.info("  fetched {} stories ({} in english)".format(len(stories['stories']),len(story_ids)))
     if 'next' in stories['link_ids']:
         next_link_id = stories['link_ids']['next']
+        more_stories = True
+    else:
+        more_stories = False
 
     # Now take all the story ids and ask for Core NLP results for them
     # We need to chunk this into batches of 200 or so to not hit the HTTP POST character limit :-(
     no_corenlp = 0
     not_annotated = 0
     processed = 0
+    do_by_sentences = []
     story_id_batches=[story_ids[x:x+CORE_NLP_QUERY_STORY_COUNT] for x in xrange(0, len(story_ids), CORE_NLP_QUERY_STORY_COUNT)]
     batch = 1
     for story_ids_batch in story_id_batches:
@@ -72,27 +77,20 @@ if content_to_use == CONTENT_NLP:
                         del story['corenlp']['_']
                     mediameter.tasks.geocode_from_nlp.delay(story)   # queue it up for geocoding
                     processed = processed + 1
-            log.debug("    fetched {} stories, added {} for processing".format(len(stories),processed))
+                else:
+                    do_by_sentences.append(str(story['stories_id']))
+            log.debug("    fetched {} stories, added {} for processing from corenlp".format(len(stories),processed))
         except ValueError:
             log.error("Error while fetching corenlp for set of stories",exc_info=True)
         batch = batch + 1
-    content_time = time.time()
-        
-    log.info("  queued {} stories".format(processed) )
-    log.info("  no_corenlp on {}".format(no_corenlp) )
-    log.info("  not_annotated on {}".format(not_annotated) )
-
-elif content_to_use == CONTENT_SENTENCES:
-
-    # Fetch the story sentences
-    stories = mc_server.storyList(
-        solr_query='*', solr_filter=solr_filter, 
-        last_processed_stories_id=last_processed_stories_id, rows=stories_to_fetch, sentences=True)
-    story_time = time.time()
-    log.info("  fetched {} stories".format(len(stories)))
-    if len(stories) > 0:
-        last_processed_stories_id = int(stories[-1]['processed_stories_id'])+1
-
+    # done with core_nlp, now need to do any non-annotated by raw sentences
+    log.info("    need to do {} from sentences".format(len(do_by_sentences)))
+    stories = [mc_server.story(sid, sentences=True) for sid in do_by_sentences]
+    #mc_server.storyList(
+    #    solr_query='stories_id:('+' '.join(do_by_sentences)+')',
+    #    rows=len(do_by_sentences),
+    #    sentences=True)
+    log.info("      fetched {} sentence stories".format(len(stories)))
     no_sentences = 0
     processed = 0
     try:
@@ -109,19 +107,10 @@ elif content_to_use == CONTENT_SENTENCES:
         log.debug("    fetched {} stories, added {} for processing".format(len(stories),processed))
     except ValueError as e:
         log.exception(e)
-    content_time = time.time()
-        
-    log.info("  queued {} stories".format(processed) )
-    log.info("  no_sentences on {}".format(no_sentences) )
+    content_time = time.time()    
+    log.info("    queued {} sentence stories".format(processed) )
+    log.info("    no_sentences on {}".format(no_sentences) )
+    duration_secs = float(time.time() - start_time)
+    log.info("  took {} seconds total".format(duration_secs))
 
-# and save that we've made progress
-settings.set('mediacloud','next_link_id',next_link_id)
-with open(mediameter.get_settings_file_path(), 'wb') as configfile:
-    settings.write(configfile)
-
-# log some stats about the run
-duration_secs = float(time.time() - start_time)
-log.info("  took {} seconds total".format(duration_secs))
-log.info("  took {} seconds to fetch stories".format(story_time - start_time) )
-log.info("  took {} seconds to fetch content".format(content_time - story_time) )
 log.info("Done")

@@ -2,3 +2,4 @@
 *.log
 settings.config
 venv
+log/*.zip
